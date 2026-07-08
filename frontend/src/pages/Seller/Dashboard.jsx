@@ -36,54 +36,22 @@ export const Dashboard = () => {
     const loadSellerAnalytics = async () => {
       setLoading(true);
       try {
-        // Fetch seller's products and order list
-        const [productsRes, ordersRes] = await Promise.all([
-          api.get(`/api/products/?seller=${user.id}`),
-          api.get('/api/orders/')
-        ]);
-
-        const sellerProducts = productsRes || [];
-        const sellerOrders = ordersRes || [];
-
-        // Calculate analytics metrics
-        let totalRevenue = 0;
-        let pendingCount = 0;
-        const salesByDate = {};
-
-        sellerOrders.forEach((ord) => {
-          // Date formatting for grouping (e.g. "Jun 28")
-          const dateLabel = new Date(ord.created_at).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric'
-          });
-
-          let orderRevenue = 0;
-          ord.items?.forEach((item) => {
-            const itemTotal = Number(item.price) * item.quantity;
-            totalRevenue += itemTotal;
-            orderRevenue += itemTotal;
-
-            if (item.status === 'Pending') {
-              pendingCount += 1;
-            }
-          });
-
-          salesByDate[dateLabel] = (salesByDate[dateLabel] || 0) + orderRevenue;
-        });
-
-        // Parse chart data for Recharts
-        const chartArray = Object.entries(salesByDate).map(([date, sales]) => ({
-          date,
-          Sales: sales
-        })).reverse(); // newest last
-
+        const res = await api.get('/api/dashboard/seller-stats/');
+        
         setStats({
-          totalProducts: sellerProducts.length,
-          totalOrders: sellerOrders.length,
-          revenue: totalRevenue,
-          pendingItems: pendingCount
+          totalProducts: res.total_products,
+          totalOrders: res.total_orders,
+          revenue: res.total_revenue,
+          pendingItems: res.pending_orders_count
         });
-        setChartData(chartArray.length > 0 ? chartArray : [{ date: 'Today', Sales: 0 }]);
+
+        const trendData = res.monthly_revenue_trend || [];
+        const chartArray = trendData.map((item) => ({
+          date: item.month,
+          Sales: item.revenue
+        }));
+
+        setChartData(chartArray.length > 0 ? chartArray : [{ date: 'No Data', Sales: 0 }]);
       } catch (err) {
         console.error('Failed to load seller analytics:', err);
         showToast('Failed to load dashboard metrics.', 'error');
