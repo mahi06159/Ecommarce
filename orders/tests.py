@@ -548,5 +548,45 @@ class PaymentTests(APITestCase):
         # Assert cart still contains the item
         self.assertTrue(self.cart.items.exists())
 
+    def test_verify_razorpay_payment_duplicate(self):
+        # 1. First, perform a successful verification to create an order
+        payment = Payment.objects.create(
+            razorpay_order_id="order_dup",
+            amount=1000.00,
+            status='Created'
+        )
+
+        self.client.force_authenticate(user=self.buyer)
+        url = reverse('razorpay_order_verify')
+
+        msg = "order_dup|pay_dup"
+        secret = settings.RAZORPAY_KEY_SECRET
+        sig = hmac.new(
+            key=secret.encode('utf-8'),
+            msg=msg.encode('utf-8'),
+            digestmod=hashlib.sha256
+        ).hexdigest()
+
+        data = {
+            "razorpay_order_id": "order_dup",
+            "razorpay_payment_id": "pay_dup",
+            "razorpay_signature": sig,
+            "cart_id": str(self.cart.id),
+            "shipping_address": self.address.id
+        }
+
+        # First verification call: creates order, status goes to Paid
+        response1 = self.client.post(url, data, format='json')
+        self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Order.objects.count(), 1)
+        created_order_id = response1.data['data']['id']
+
+        # Second verification call: should return success and NOT create a new order
+        response2 = self.client.post(url, data, format='json')
+        self.assertEqual(response2.status_code, status.HTTP_200_OK)
+        self.assertEqual(Order.objects.count(), 1)
+        self.assertEqual(response2.data['data']['id'], created_order_id)
+
+
 
 

@@ -201,6 +201,10 @@ export const Checkout = () => {
       };
 
       const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response) {
+        showToast(response.error.description || 'Payment failed.', 'error');
+        setPlacingOrder(false);
+      });
       rzp.open();
 
     } catch (err) {
