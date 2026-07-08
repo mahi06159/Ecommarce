@@ -122,13 +122,15 @@ class SellerStatsView(APIView):
                 "total_sales": float(item['total_sales'] or 0.00)
             })
 
-        # 7. Monthly revenue trend (last 6 months, grouped by month)
+        # 7. Monthly revenue trend (last 6 months, grouped by month, excluding Cancelled items)
         six_months_ago = timezone.now() - datetime.timedelta(days=180)
         monthly_trend = OrderItem.objects.filter(
             product__seller=seller,
             created_at__gte=six_months_ago
         ).filter(
             Q(order__status='Completed') | Q(order__payments__status='Paid')
+        ).exclude(
+            status='Cancelled'
         ).annotate(
             month=TruncMonth('created_at')
         ).values('month').annotate(

@@ -205,3 +205,7 @@ class SellerStatsTests(APITestCase):
         self.assertIn("Laptop A", top_selling_names)
         self.assertNotIn("Mouse A", top_selling_names)
 
+        # monthly_revenue_trend should only sum Laptop A (2000.00), excluding Mouse A (1500.00)
+        self.assertEqual(len(data['monthly_revenue_trend']), 1)
+        self.assertEqual(data['monthly_revenue_trend'][0]['revenue'], 2000.00)
+

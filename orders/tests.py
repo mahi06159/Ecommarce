@@ -587,6 +587,93 @@ class PaymentTests(APITestCase):
         self.assertEqual(Order.objects.count(), 1)
         self.assertEqual(response2.data['data']['id'], created_order_id)
 
+    def test_verify_payment_sends_emails(self):
+        from django.core import mail
+        
+        # Clear outbox
+        mail.outbox = []
+
+        payment = Payment.objects.create(
+            razorpay_order_id="order_email_test",
+            amount=1000.00,
+            status='Created'
+        )
+
+        self.client.force_authenticate(user=self.buyer)
+        url = reverse('razorpay_order_verify')
+
+        msg = "order_email_test|pay_email_test"
+        secret = settings.RAZORPAY_KEY_SECRET
+        sig = hmac.new(
+            key=secret.encode('utf-8'),
+            msg=msg.encode('utf-8'),
+            digestmod=hashlib.sha256
+        ).hexdigest()
+
+        data = {
+            "razorpay_order_id": "order_email_test",
+            "razorpay_payment_id": "pay_email_test",
+            "razorpay_signature": sig,
+            "cart_id": str(self.cart.id),
+            "shipping_address": self.address.id
+        }
+
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # 1. Verify buyer and seller receive emails (2 emails in total)
+        self.assertEqual(len(mail.outbox), 2)
+        
+        buyer_mail = next(m for m in mail.outbox if m.to == ["buyerpay@example.com"])
+        seller_mail = next(m for m in mail.outbox if m.to == ["sellerpay@example.com"])
+
+        # Check buyer email contents
+        self.assertIn("Order Confirmation", buyer_mail.subject)
+        self.assertIn("Smartphone x 2", buyer_mail.body)
+        self.assertIn("123 Main St", buyer_mail.body)
+
+        # Check seller email contents
+        self.assertIn("New Sale Notification", seller_mail.subject)
+        self.assertIn("Smartphone x 2", seller_mail.body)
+
+    @patch('orders.views.send_mail')
+    def test_verify_payment_graceful_email_failure(self, mock_send_mail):
+        # Mock send_mail to raise Exception
+        mock_send_mail.side_effect = Exception("SMTP server is down")
+
+        payment = Payment.objects.create(
+            razorpay_order_id="order_fail_email_test",
+            amount=1000.00,
+            status='Created'
+        )
+
+        self.client.force_authenticate(user=self.buyer)
+        url = reverse('razorpay_order_verify')
+
+        msg = "order_fail_email_test|pay_fail_email_test"
+        secret = settings.RAZORPAY_KEY_SECRET
+        sig = hmac.new(
+            key=secret.encode('utf-8'),
+            msg=msg.encode('utf-8'),
+            digestmod=hashlib.sha256
+        ).hexdigest()
+
+        data = {
+            "razorpay_order_id": "order_fail_email_test",
+            "razorpay_payment_id": "pay_fail_email_test",
+            "razorpay_signature": sig,
+            "cart_id": str(self.cart.id),
+            "shipping_address": self.address.id
+        }
+
+        response = self.client.post(url, data, format='json')
+        # Response should still be successful (graceful handling of exception)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        
+        payment.refresh_from_db()
+        self.assertEqual(payment.status, 'Paid')
+
+
 
 
 

@@ -4,6 +4,10 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.db import transaction
+from django.core.mail import send_mail
+import logging
+
+logger = logging.getLogger(__name__)
 import hmac
 import hashlib
 import json
@@ -570,6 +574,8 @@ class RazorpayOrderVerifyView(APIView):
             )
 
         # If signature is valid, finalize payment and create order atomically
+        order = None
+        response_data = None
         try:
             with transaction.atomic():
                 # Lock the payment row
@@ -607,11 +613,7 @@ class RazorpayOrderVerifyView(APIView):
                 payment.order = order
                 payment.save()
 
-                return success_response(
-                    message="Payment verified and order placed successfully.",
-                    data=serializer.data,
-                    status_code=status.HTTP_201_CREATED
-                )
+                response_data = serializer.data
         except Exception as e:
             errors = e.detail if hasattr(e, 'detail') else {"detail": str(e)}
             return error_response(
@@ -619,6 +621,87 @@ class RazorpayOrderVerifyView(APIView):
                 errors=errors,
                 status_code=status.HTTP_400_BAD_REQUEST
             )
+
+        # Send emails outside the transaction block
+        if order:
+            try:
+                items = order.items.all().select_related('product', 'product__seller')
+                
+                # Send email to Buyer
+                buyer_email = order.buyer.email
+                buyer_username = order.buyer.username
+                shipping_addr = order.shipping_address_text or str(order.shipping_address)
+                
+                item_details_text = ""
+                for it in items:
+                    name = it.product.name if it.product else it.product_name
+                    item_details_text += f"- {name} x {it.quantity} (Price: {it.price})\n"
+                
+                buyer_subject = f"Order Confirmation - Order #{order.id}"
+                buyer_body = (
+                    f"Hello {buyer_username},\n\n"
+                    f"Your payment has been verified and your order has been placed successfully!\n\n"
+                    f"Order Details:\n"
+                    f"Order ID: #{order.id}\n"
+                    f"Total Price: {order.total_price}\n"
+                    f"Shipping Address:\n{shipping_addr}\n\n"
+                    f"Items Ordered:\n{item_details_text}\n"
+                    f"Thank you for shopping with us! 🌸"
+                )
+                
+                send_mail(
+                    subject=buyer_subject,
+                    message=buyer_body,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[buyer_email],
+                    fail_silently=False
+                )
+                
+                # Group items by seller
+                seller_items = {}
+                for it in items:
+                    if it.product and it.product.seller:
+                        seller = it.product.seller
+                        if seller.id not in seller_items:
+                            seller_items[seller.id] = {
+                                "email": seller.email,
+                                "username": seller.username,
+                                "items": []
+                            }
+                        seller_items[seller.id]["items"].append(it)
+                
+                for s_id, s_info in seller_items.items():
+                    s_email = s_info["email"]
+                    s_username = s_info["username"]
+                    s_item_details_text = ""
+                    for it in s_info["items"]:
+                        name = it.product.name
+                        s_item_details_text += f"- {name} x {it.quantity} (Price: {it.price})\n"
+                    
+                    seller_subject = f"New Sale Notification - Order #{order.id}"
+                    seller_body = (
+                        f"Hello {s_username},\n\n"
+                        f"You have received a new order!\n\n"
+                        f"Order ID: #{order.id}\n\n"
+                        f"Your Items Ordered:\n{s_item_details_text}\n"
+                        f"Please prepare the shipment. 📦"
+                    )
+                    
+                    send_mail(
+                        subject=seller_subject,
+                        message=seller_body,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[s_email],
+                        fail_silently=False
+                    )
+            except Exception as mail_err:
+                logger.error("Failed to send order confirmation emails for Order #%s: %s", order.id, str(mail_err))
+
+        return success_response(
+            message="Payment verified and order placed successfully.",
+            data=response_data,
+            status_code=status.HTTP_201_CREATED
+        )
 
 
 
