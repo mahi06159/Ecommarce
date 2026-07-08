@@ -39,12 +39,13 @@ export const Checkout = () => {
     setLoadingAddresses(true);
     try {
       const data = await api.get('/api/addresses/');
-      setAddresses(data || []);
+      const addrList = Array.isArray(data) ? data : (data?.data && Array.isArray(data.data) ? data.data : []);
+      setAddresses(addrList);
       
       // Auto select default address or first one
-      if (data && data.length > 0) {
-        const defaultAddr = data.find(a => a.is_default);
-        setSelectedAddressId(defaultAddr ? defaultAddr.id : data[0].id);
+      if (addrList.length > 0) {
+        const defaultAddr = addrList.find(a => a.is_default);
+        setSelectedAddressId(defaultAddr ? defaultAddr.id : addrList[0].id);
       }
     } catch (err) {
       console.error(err);

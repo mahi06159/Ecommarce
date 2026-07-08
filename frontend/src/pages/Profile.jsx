@@ -57,7 +57,8 @@ export const Profile = () => {
           setOrders(data || []);
         } else if (currentTab === 'addresses') {
           const data = await api.get('/api/addresses/');
-          setAddresses(data || []);
+          const addrList = Array.isArray(data) ? data : (data?.data && Array.isArray(data.data) ? data.data : []);
+          setAddresses(addrList);
         } else if (currentTab === 'reviews') {
           // Fetch reviews written by the buyer
           const data = await api.get(`/api/reviews/?buyer=${user.id}`);
@@ -141,7 +142,8 @@ export const Profile = () => {
 
       // Reload list
       const data = await api.get('/api/addresses/');
-      setAddresses(data || []);
+      const addrList = Array.isArray(data) ? data : (data?.data && Array.isArray(data.data) ? data.data : []);
+      setAddresses(addrList);
     } catch (err) {
       showToast('Failed to save address.', 'error');
     }
