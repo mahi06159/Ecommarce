@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.contrib.auth import get_user_model
-from authentication.models import BuyerProfile
+from authentication.models import BuyerProfile, PasswordResetToken
 
 User = get_user_model()
 
@@ -208,5 +208,101 @@ class AuthenticationTests(APITestCase):
         new_user = User.objects.get(email="unique@example.com")
         self.assertEqual(new_user.username, "unique_username")
         self.assertEqual(new_user.phone_number, "+9998887777")
+
+    def test_password_reset_flow_success(self):
+        # Create user
+        user = User.objects.create_user(
+            username="reset_user",
+            email="reset@example.com",
+            password="oldpassword123",
+            role="Buyer"
+        )
+        # Request reset
+        url_request = reverse('password_reset_request')
+        response = self.client.post(url_request, {"email": "reset@example.com"}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data['success'])
+        
+        # Verify token created in DB
+        reset_token = PasswordResetToken.objects.filter(user=user).first()
+        self.assertIsNotNone(reset_token)
+        self.assertFalse(reset_token.is_used)
+        
+        # Confirm reset
+        url_confirm = reverse('password_reset_confirm')
+        confirm_data = {
+            "token": reset_token.token,
+            "password": "newpassword123"
+        }
+        response_confirm = self.client.post(url_confirm, confirm_data, format='json')
+        self.assertEqual(response_confirm.status_code, status.HTTP_200_OK)
+        self.assertTrue(response_confirm.data['success'])
+        
+        # Verify token is now marked as used
+        reset_token.refresh_from_db()
+        self.assertTrue(reset_token.is_used)
+        
+        # Verify user password is changed (can login with new password)
+        url_login = reverse('login')
+        response_login = self.client.post(url_login, {"username": "reset_user", "password": "newpassword123"}, format='json')
+        self.assertEqual(response_login.status_code, status.HTTP_200_OK)
+
+    def test_password_reset_request_nonexistent_email(self):
+        # Request reset for email not in system
+        url_request = reverse('password_reset_request')
+        response = self.client.post(url_request, {"email": "nonexistent@example.com"}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data['success'])
+        # Assert no token created
+        self.assertEqual(PasswordResetToken.objects.count(), 0)
+
+    def test_password_reset_confirm_invalid_token(self):
+        url_confirm = reverse('password_reset_confirm')
+        response = self.client.post(url_confirm, {"token": "invalidtoken123", "password": "newpassword123"}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(response.data['success'])
+
+    def test_password_reset_confirm_expired_token(self):
+        user = User.objects.create_user(
+            username="expired_reset",
+            email="expired@example.com",
+            password="oldpassword123",
+            role="Buyer"
+        )
+        # Create an expired token manually
+        from django.utils import timezone
+        from datetime import timedelta
+        reset_token = PasswordResetToken.objects.create(
+            user=user,
+            token="expired_token_val",
+            expires_at=timezone.now() - timedelta(minutes=1)
+        )
+        
+        url_confirm = reverse('password_reset_confirm')
+        response = self.client.post(url_confirm, {"token": "expired_token_val", "password": "newpassword123"}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(response.data['success'])
+
+    def test_password_reset_confirm_reused_token(self):
+        user = User.objects.create_user(
+            username="reused_reset",
+            email="reused@example.com",
+            password="oldpassword123",
+            role="Buyer"
+        )
+        from django.utils import timezone
+        from datetime import timedelta
+        reset_token = PasswordResetToken.objects.create(
+            user=user,
+            token="reused_token_val",
+            is_used=True,
+            expires_at=timezone.now() + timedelta(minutes=30)
+        )
+        
+        url_confirm = reverse('password_reset_confirm')
+        response = self.client.post(url_confirm, {"token": "reused_token_val", "password": "newpassword123"}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(response.data['success'])
+
 
 

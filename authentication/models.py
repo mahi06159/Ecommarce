@@ -73,5 +73,20 @@ class SellerProfile(SoftDeleteMixin, TimestampMixin):
         return f"Seller Profile: {self.user.username}"
 
 
+class PasswordResetToken(TimestampMixin):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='password_reset_tokens'
+    )
+    token = models.CharField(max_length=255, unique=True)
+    is_used = models.BooleanField(default=False)
+    expires_at = models.DateTimeField()
+
+    def __str__(self):
+        return f"Reset token for {self.user.email} (Used: {self.is_used})"
+
+
+
 
 

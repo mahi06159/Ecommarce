@@ -73,3 +73,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Embed the user info inside the response JSON
         data['user'] = UserSerializer(self.user).data
         return data
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    password = serializers.CharField(min_length=6, write_only=True)
+

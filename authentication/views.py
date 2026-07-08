@@ -3,15 +3,22 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
+import uuid
+from django.utils import timezone
+from datetime import timedelta
+from django.core.mail import send_mail
+from django.contrib.auth import get_user_model
 
 from ecom_project.utils import success_response, error_response
-from authentication.models import BuyerProfile, SellerProfile
+from authentication.models import BuyerProfile, SellerProfile, PasswordResetToken
 from authentication.serializers import (
     UserRegisterSerializer,
     UserSerializer,
     CustomTokenObtainPairSerializer,
     BuyerProfileSerializer,
-    SellerProfileSerializer
+    SellerProfileSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer
 )
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
@@ -180,5 +187,113 @@ class ProfileView(APIView):
             message="User account deleted successfully.",
             status_code=status.HTTP_200_OK
         )
+
+
+User = get_user_model()
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return error_response(
+                message="Invalid input data.",
+                errors=serializer.errors,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
+        email = serializer.validated_data['email']
+        user = User.objects.filter(email=email).first()
+
+        if user:
+            # Generate token and store it
+            token = uuid.uuid4().hex
+            expires_at = timezone.now() + timedelta(minutes=30)
+            PasswordResetToken.objects.create(
+                user=user,
+                token=token,
+                expires_at=expires_at
+            )
+
+            # Send Email
+            subject = "Password Reset Request - Mahi Store"
+            message = (
+                f"Hello {user.username},\n\n"
+                f"You requested a password reset for your account. Please click the link below to reset your password:\n\n"
+                f"http://localhost:5173/reset-password?token={token}\n\n"
+                f"This link will expire in 30 minutes.\n\n"
+                f"If you did not request this, please ignore this email.\n"
+            )
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    'noreply@mahistore.com',
+                    [email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                # Log the error or handle it, but still return success to the user
+                pass
+
+        # Return generic success message to prevent user enumeration
+        return success_response(
+            message="If an account with that email exists, we have sent a password reset link.",
+            status_code=status.HTTP_200_OK
+        )
+
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        if not serializer.is_valid():
+            return error_response(
+                message="Invalid input data.",
+                errors=serializer.errors,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
+        token_str = serializer.validated_data['token']
+        password = serializer.validated_data['password']
+
+        reset_token = PasswordResetToken.objects.filter(token=token_str).first()
+
+        if not reset_token:
+            return error_response(
+                message="Invalid or expired token.",
+                errors={"token": ["Invalid token."]},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
+        if reset_token.is_used:
+            return error_response(
+                message="This token has already been used.",
+                errors={"token": ["Token already used."]},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
+        if reset_token.expires_at < timezone.now():
+            return error_response(
+                message="This token has expired.",
+                errors={"token": ["Token expired."]},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Update password
+        user = reset_token.user
+        user.set_password(password)
+        user.save()
+
+        # Mark token and all other user tokens as used
+        PasswordResetToken.objects.filter(user=user, is_used=False).update(is_used=True)
+
+        return success_response(
+            message="Password reset successfully. You can now login with your new password.",
+            status_code=status.HTTP_200_OK
+        )
+
 
 

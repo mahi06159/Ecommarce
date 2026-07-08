@@ -14,6 +14,8 @@ import { Products } from './pages/Products';
 import { ProductDetail } from './pages/ProductDetail';
 import { Checkout } from './pages/Checkout';
 import { Profile } from './pages/Profile';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { ResetPassword } from './pages/ResetPassword';
 import { Dashboard as SellerDashboard } from './pages/Seller/Dashboard';
 import { MyProducts as SellerProducts } from './pages/Seller/MyProducts';
 import { ReceivedOrders as SellerOrders } from './pages/Seller/ReceivedOrders';
@@ -68,6 +70,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/products" element={<Products />} />
               <Route path="/products/:id" element={<ProductDetail />} />
               

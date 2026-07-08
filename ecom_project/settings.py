@@ -178,3 +178,6 @@ SIMPLE_HISTORY_REVERT_DISABLED = True
 
 CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS')
 
+EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+
+
