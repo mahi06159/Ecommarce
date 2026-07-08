@@ -1,0 +1,167 @@
+.register-page-wrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-light);
+  padding: 40px 20px;
+}
+
+.register-container {
+  width: 100%;
+  max-width: 640px;
+  background-color: var(--mahi-white);
+  border: 1px solid var(--mahi-pink-mid);
+  box-shadow: var(--shadow-soft);
+  padding: 40px;
+}
+
+.register-box {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.register-header {
+  text-align: center;
+}
+
+.register-header h1 {
+  font-size: 36px;
+  color: var(--mahi-dark);
+  margin-bottom: 8px;
+}
+
+.register-header p {
+  font-size: 14px;
+  color: var(--mahi-gray);
+}
+
+/* Step 1: Role Cards Selection */
+.role-selection-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.selection-title {
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--mahi-dark);
+  margin-bottom: 8px;
+}
+
+.role-cards-container {
+  display: flex;
+  gap: 24px;
+}
+
+.role-card {
+  flex: 1;
+  border: 2px solid var(--mahi-pink-mid);
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--mahi-white);
+  transition: var(--transition-smooth);
+}
+
+.role-card-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: var(--mahi-pink-light);
+  color: var(--mahi-pink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  transition: var(--transition-smooth);
+}
+
+.role-card h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--mahi-dark);
+  margin-bottom: 10px;
+}
+
+.role-card p {
+  font-size: 13px;
+  color: var(--mahi-gray);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.btn-role-select {
+  margin-top: auto;
+  border: 1px solid var(--mahi-pink);
+  color: var(--mahi-pink);
+  padding: 10px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  width: 100%;
+}
+
+/* Hover effects */
+.role-card:hover {
+  border-color: var(--mahi-pink);
+  box-shadow: 0 8px 30px rgba(212, 84, 122, 0.08);
+  transform: translateY(-2px);
+}
+
+.role-card:hover .role-card-icon-wrapper {
+  background-color: var(--mahi-pink);
+  color: var(--mahi-white);
+}
+
+.role-card:hover .btn-role-select {
+  background-color: var(--mahi-pink);
+  color: var(--mahi-white);
+}
+
+/* Step 2: Form */
+.register-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.btn-back-role {
+  color: var(--mahi-gray);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-back-role:hover {
+  color: var(--mahi-pink);
+}
+
+.selected-role-badge {
+  background-color: var(--mahi-pink-light);
+  color: var(--mahi-pink);
+  padding: 8px 16px;
+  font-size: 13px;
+  border-left: 3px solid var(--mahi-pink);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .role-cards-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .register-container {
+    padding: 24px;
+  }
+}

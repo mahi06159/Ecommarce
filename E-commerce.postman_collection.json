@@ -1,0 +1,1061 @@
+{
+	"info": {
+		"_postman_id": "f5d023a1-12a8-4e89-a292-8083b79148d2",
+		"name": "E-commerce API",
+		"description": "Postman Collection for the E-commerce API covering Auth, Profiles, Addresses, Products, Carts, Orders, Reviews, and Dashboard.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication & Profile",
+			"item": [
+				{
+					"name": "Register Buyer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"new_buyer_user\",\n    \"email\": \"new_buyer@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/auth/register/buyer/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"auth",
+								"register",
+								"buyer",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Seller",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"new_seller_user\",\n    \"email\": \"new_seller@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/auth/register/seller/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"auth",
+								"register",
+								"seller",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"john_doe\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/auth/login/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"auth",
+								"login",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Token Refresh",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"<refresh_token_here>\"\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/auth/token/refresh/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"auth",
+								"token",
+								"refresh",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"<refresh_token_here>\"\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/auth/logout/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"auth",
+								"logout",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/auth/profile/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"auth",
+								"profile",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"profile\": {\n        \"phone_number\": \"+15550199\",\n        \"store_name\": \"New Gadget Hub Store\",\n        \"store_description\": \"An updated store description.\"\n    }\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/auth/profile/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"auth",
+								"profile",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Addresses",
+			"item": [
+				{
+					"name": "List Addresses",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/addresses/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"addresses",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Address",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"address_line1\": \"555 Pinecrest Road\",\n    \"address_line2\": \"Apt 12\",\n    \"city\": \"Seattle\",\n    \"state\": \"WA\",\n    \"postal_code\": \"98101\",\n    \"country\": \"USA\",\n    \"is_default\": true\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/addresses/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"addresses",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Address Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/addresses/1/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"addresses",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Address",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"address_line1\": \"999 Updated Lane\",\n    \"is_default\": false\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/addresses/1/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"addresses",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Address",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/addresses/1/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"addresses",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cart",
+			"item": [
+				{
+					"name": "Get Cart (Anonymous / User)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/cart/?cart_id=<optional_cart_uuid>",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"cart",
+								""
+							],
+							"query": [
+								{
+									"key": "cart_id",
+									"value": "<optional_cart_uuid>"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Product to Cart",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cart_id\": \"<optional_cart_uuid_if_existing>\",\n    \"product\": 1,\n    \"quantity\": 2\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/cart/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"cart",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Cart Item Quantity",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantity\": 5\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/cart/items/1/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"cart",
+								"items",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Item from Cart",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/cart/items/1/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"cart",
+								"items",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Products & Categories",
+			"item": [
+				{
+					"name": "List Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/categories/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"categories",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Sports & Outdoors\"\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/categories/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"categories",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/products/?category=&seller=&search=",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"products",
+								""
+							],
+							"query": [
+								{
+									"key": "category",
+									"value": ""
+								},
+								{
+									"key": "seller",
+									"value": ""
+								},
+								{
+									"key": "search",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"category\": 1,\n    \"name\": \"Gaming Headset\",\n    \"details\": \"Immersive 7.1 surround sound gaming headphones.\",\n    \"price\": \"59.99\",\n    \"stock\": 15\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/products/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"products",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Product Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/products/1/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"products",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"price\": \"69.99\",\n    \"stock\": 20\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/products/1/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"products",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Soft Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/products/1/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"products",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "List Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/orders/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"orders",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Place Order from Cart",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shipping_address\": 1,\n    \"cart_id\": \"<cart_uuid_here>\"\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/orders/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"orders",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Place Order Direct List",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shipping_address\": 1,\n    \"items\": [\n        {\n            \"product\": 1,\n            \"quantity\": 2\n        },\n        {\n            \"product\": 2,\n            \"quantity\": 1\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/orders/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"orders",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Order Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/orders/1/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"orders",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order Item Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"Completed\"\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/orders/items/1/status/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"orders",
+								"items",
+								"1",
+								"status",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reviews",
+			"item": [
+				{
+					"name": "List Reviews",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/reviews/?product=&buyer=",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"reviews",
+								""
+							],
+							"query": [
+								{
+									"key": "product",
+									"value": ""
+								},
+								{
+									"key": "buyer",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Review",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product\": 1,\n    \"rating\": 5,\n    \"comment\": \"Excellent product, very fast shipping!\"\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/reviews/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"reviews",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Review Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/reviews/1/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"reviews",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Review",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 4,\n    \"comment\": \"Actually, changed it to 4 stars after a week of use.\"\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/reviews/1/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"reviews",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Review",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer <access_token_here>"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8001/api/reviews/1/",
+							"protocol": "http",
+							"host": [
+								"127.0.0.1"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"reviews",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dashboard Index",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8001/api/dashboard/",
+					"protocol": "http",
+					"host": [
+						"127.0.0.1"
+					],
+					"port": "8001",
+					"path": [
+						"api",
+						"dashboard",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
