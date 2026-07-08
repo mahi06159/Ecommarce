@@ -11,34 +11,36 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-import os
-env_path = BASE_DIR / '.env'
-if env_path.exists():
-    with open(env_path) as f:
-        for line in f:
-            line = line.strip()
-            if line and not line.startswith('#') and '=' in line:
-                key, val = line.split('=', 1)
-                os.environ[key.strip()] = val.strip()
+# Initialize Env
+env = environ.Env(
+    DEBUG=(bool, False),
+    ALLOWED_HOSTS=(list, []),
+    CORS_ALLOWED_ORIGINS=(list, ['http://localhost:5173']),
+)
 
-RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', 'rzp_test_placeholder_key_id')
-RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', 'placeholder_secret_key')
+# Take environment variables from .env file
+environ.Env.read_env(BASE_DIR / '.env')
+
+RAZORPAY_KEY_ID = env('RAZORPAY_KEY_ID', default='rzp_test_placeholder_key_id')
+RAZORPAY_KEY_SECRET = env('RAZORPAY_KEY_SECRET', default='placeholder_secret_key')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1h^)@*dp*_f-21lt#!5ohj#ur8qv=p4^a^@r79j6*c_83rcqs$'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env('ALLOWED_HOSTS')
+
 
 
 # Application definition
@@ -52,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # Third party apps
+    'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
@@ -86,6 +89,7 @@ SIMPLE_JWT = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -171,3 +175,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SIMPLE_HISTORY_REVERT_DISABLED = True
+
+CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS')
+
