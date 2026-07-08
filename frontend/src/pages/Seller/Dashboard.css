@@ -189,3 +189,53 @@
     text-align: center;
   }
 }
+
+.low-stock-alert-badge {
+  display: inline-block;
+  background-color: #FEF3C7;
+  color: #D97706;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 4px;
+  align-self: flex-start;
+}
+
+/* Top Selling Products List */
+.top-selling-section {
+  background-color: var(--mahi-white);
+  border: 1px solid var(--mahi-pink-mid);
+  padding: 30px;
+  margin-bottom: 40px;
+}
+
+.top-selling-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.top-selling-table th, .top-selling-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 14px;
+}
+
+.top-selling-table th {
+  font-weight: 700;
+  color: var(--mahi-gray);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+
+.top-selling-table td {
+  color: var(--mahi-dark);
+}
+
+.top-selling-table tr:hover {
+  background-color: #faf5f5;
+}
+

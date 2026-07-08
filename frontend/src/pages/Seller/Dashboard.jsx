@@ -17,7 +17,9 @@ export const Dashboard = () => {
     totalProducts: 0,
     totalOrders: 0,
     revenue: 0,
-    pendingItems: 0
+    pendingItems: 0,
+    lowStockCount: 0,
+    topProducts: []
   });
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +44,9 @@ export const Dashboard = () => {
           totalProducts: res.total_products,
           totalOrders: res.total_orders,
           revenue: res.total_revenue,
-          pendingItems: res.pending_orders_count
+          pendingItems: res.pending_orders_count,
+          lowStockCount: res.low_stock_products,
+          topProducts: res.top_5_selling_products || []
         });
 
         const trendData = res.monthly_revenue_trend || [];
@@ -99,6 +103,11 @@ export const Dashboard = () => {
             <div className="card-info">
               <span className="info-label">My Products</span>
               <strong className="info-value font-mono">{stats.totalProducts}</strong>
+              {stats.lowStockCount > 0 && (
+                <span className="low-stock-alert-badge">
+                  ⚠️ {stats.lowStockCount} Low Stock
+                </span>
+              )}
             </div>
           </div>
 
@@ -163,6 +172,37 @@ export const Dashboard = () => {
               </ResponsiveContainer>
             )}
           </div>
+        </div>
+
+        {/* Top Selling Products Section */}
+        <div className="top-selling-section">
+          <h3 className="chart-title font-serif">Top Selling Products</h3>
+          {stats.topProducts.length === 0 ? (
+            <div className="empty-chart-notice">
+              <p>No products sold yet. Create orders and collect payments to populate this list! 🌸</p>
+            </div>
+          ) : (
+            <table className="top-selling-table">
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Quantity Sold</th>
+                  <th>Total Sales</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.topProducts.map((prod) => (
+                  <tr key={prod.product_id}>
+                    <td style={{ fontWeight: 600 }}>{prod.product_name}</td>
+                    <td className="font-mono">{prod.quantity_sold}</td>
+                    <td className="font-mono" style={{ color: '#059669', fontWeight: 600 }}>
+                      {formatPrice(prod.total_sales)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* Fast Action hub */}

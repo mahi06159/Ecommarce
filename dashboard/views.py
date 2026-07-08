@@ -70,11 +70,13 @@ class SellerStatsView(APIView):
                 status_code=status.HTTP_403_FORBIDDEN
             )
 
-        # 1. Total revenue (sum of price*quantity for seller's order items where payment is Paid or order is Completed)
+        # 1. Total revenue (sum of price*quantity for seller's order items where payment is Paid or order is Completed, excluding Cancelled items)
         revenue_data = OrderItem.objects.filter(
             product__seller=seller
         ).filter(
             Q(order__status='Completed') | Q(order__payments__status='Paid')
+        ).exclude(
+            status='Cancelled'
         ).aggregate(
             total=Sum(F('price') * F('quantity'), output_field=DecimalField())
         )
@@ -97,11 +99,13 @@ class SellerStatsView(APIView):
         # 5. Low stock products (stock < 5)
         low_stock_products = Product.objects.filter(seller=seller, stock__lt=5).count()
 
-        # 6. Top 5 selling products (by quantity sold)
+        # 6. Top 5 selling products (by quantity sold, excluding Cancelled items)
         top_5 = OrderItem.objects.filter(
             product__seller=seller
         ).filter(
             Q(order__status='Completed') | Q(order__payments__status='Paid')
+        ).exclude(
+            status='Cancelled'
         ).values(
             'product__id', 'product__name'
         ).annotate(

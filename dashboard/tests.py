@@ -154,3 +154,54 @@ class SellerStatsTests(APITestCase):
         self.assertEqual(data_b['total_orders'], 1)
         self.assertEqual(data_b['pending_orders_count'], 1)
         self.assertEqual(data_b['total_products'], 1)
+
+    def test_seller_stats_excludes_cancelled_order_items(self):
+        # 1. Place order containing both an active product and a cancelled product
+        order = Order.objects.create(
+            buyer=self.buyer,
+            shipping_address=self.address,
+            status='Pending'
+        )
+        
+        # Laptop A (active): quantity=2, price=1000
+        item_active = OrderItem.objects.create(
+            order=order,
+            product=self.prod_a1,
+            product_name="Laptop A",
+            quantity=2,
+            price=1000.00,
+            status='Pending'
+        )
+        # Mouse A (cancelled): quantity=3, price=500 (Normally 1500 revenue, but cancelled)
+        item_cancelled = OrderItem.objects.create(
+            order=order,
+            product=self.prod_a2,
+            product_name="Mouse A",
+            quantity=3,
+            price=500.00,
+            status='Cancelled'
+        )
+
+        # Create paid payment
+        Payment.objects.create(
+            order=order,
+            razorpay_order_id="pay_ord_cancelled_test",
+            amount=3500.00,
+            status='Paid'
+        )
+
+        # Retrieve stats for Seller A
+        url = reverse('seller_stats')
+        self.client.force_authenticate(user=self.seller_a)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data['data']
+
+        # total_revenue should only be 2000.00, excluding the 1500.00 cancelled item
+        self.assertEqual(data['total_revenue'], 2000.00)
+
+        # top_5_selling_products should only contain Laptop A, not Mouse A
+        top_selling_names = [p['product_name'] for p in data['top_5_selling_products']]
+        self.assertIn("Laptop A", top_selling_names)
+        self.assertNotIn("Mouse A", top_selling_names)
+
