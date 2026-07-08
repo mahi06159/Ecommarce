@@ -304,5 +304,62 @@ class AuthenticationTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(response.data['success'])
 
+    def test_password_reset_confirm_weak_password(self):
+        user = User.objects.create_user(
+            username="weak_reset",
+            email="weak@example.com",
+            password="oldpassword123",
+            role="Buyer"
+        )
+        from django.utils import timezone
+        from datetime import timedelta
+        reset_token = PasswordResetToken.objects.create(
+            user=user,
+            token="weak_token_val",
+            expires_at=timezone.now() + timedelta(minutes=30)
+        )
+        
+        url_confirm = reverse('password_reset_confirm')
+        response = self.client.post(url_confirm, {"token": "weak_token_val", "password": "123"}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(response.data['success'])
+        self.assertIn("password", response.data['errors'])
+
+    def test_password_reset_invalidates_existing_tokens(self):
+        user = User.objects.create_user(
+            username="jwt_reset",
+            email="jwt_reset@example.com",
+            password="oldpassword123",
+            role="Buyer"
+        )
+        
+        # 1. Login to generate refresh token
+        url_login = reverse('login')
+        response_login = self.client.post(url_login, {"username": "jwt_reset", "password": "oldpassword123"}, format='json')
+        self.assertEqual(response_login.status_code, status.HTTP_200_OK)
+        refresh_token = response_login.data['data']['refresh']
+        
+        # 2. Verify we can use this refresh token successfully before reset
+        url_refresh = reverse('token_refresh')
+        response_refresh_before = self.client.post(url_refresh, {"refresh": refresh_token}, format='json')
+        self.assertEqual(response_refresh_before.status_code, status.HTTP_200_OK)
+        
+        # 3. Create reset token and complete reset flow
+        from django.utils import timezone
+        from datetime import timedelta
+        reset_token = PasswordResetToken.objects.create(
+            user=user,
+            token="jwt_token_val",
+            expires_at=timezone.now() + timedelta(minutes=30)
+        )
+        url_confirm = reverse('password_reset_confirm')
+        response_confirm = self.client.post(url_confirm, {"token": "jwt_token_val", "password": "newpassword123"}, format='json')
+        self.assertEqual(response_confirm.status_code, status.HTTP_200_OK)
+        
+        # 4. Attempt to use old refresh token to verify it fails
+        response_refresh_after = self.client.post(url_refresh, {"refresh": refresh_token}, format='json')
+        self.assertEqual(response_refresh_after.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
 
 

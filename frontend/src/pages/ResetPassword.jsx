@@ -49,7 +49,8 @@ export const ResetPassword = () => {
       }, 3000);
     } catch (err) {
       console.error(err);
-      const errMsg = err.response?.data?.message || 'Password reset failed.';
+      const valErrors = err.response?.data?.errors?.password;
+      const errMsg = valErrors ? valErrors.join(' ') : (err.response?.data?.message || 'Password reset failed.');
       showToast(errMsg, 'error');
     } finally {
       setLoading(false);

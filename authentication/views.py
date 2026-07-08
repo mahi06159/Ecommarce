@@ -8,6 +8,12 @@ from django.utils import timezone
 from datetime import timedelta
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+import logging
+
+logger = logging.getLogger(__name__)
 
 from ecom_project.utils import success_response, error_response
 from authentication.models import BuyerProfile, SellerProfile, PasswordResetToken
@@ -235,7 +241,7 @@ class PasswordResetRequestView(APIView):
                 )
             except Exception as e:
                 # Log the error or handle it, but still return success to the user
-                pass
+                logger.error("Failed to send password reset email to %s: %s", email, str(e))
 
         # Return generic success message to prevent user enumeration
         return success_response(
@@ -284,11 +290,25 @@ class PasswordResetConfirmView(APIView):
 
         # Update password
         user = reset_token.user
+        try:
+            validate_password(password, user=user)
+        except ValidationError as e:
+            return error_response(
+                message="Password validation failed.",
+                errors={"password": list(e.messages)},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
         user.set_password(password)
         user.save()
 
         # Mark token and all other user tokens as used
         PasswordResetToken.objects.filter(user=user, is_used=False).update(is_used=True)
+
+        # Blacklist all of the user's existing outstanding JWT refresh tokens
+        outstanding_tokens = OutstandingToken.objects.filter(user=user)
+        for ot in outstanding_tokens:
+            BlacklistedToken.objects.get_or_create(token=ot)
 
         return success_response(
             message="Password reset successfully. You can now login with your new password.",
