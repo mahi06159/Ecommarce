@@ -106,7 +106,9 @@ function App() {
               {/* Protected Buyer Routes */}
               <Route path="/checkout" element={
                 <ProtectedRoute>
-                  <Checkout />
+                  <RoleGuard allowedRole="Buyer">
+                    <Checkout />
+                  </RoleGuard>
                 </ProtectedRoute>
               } />
               <Route path="/profile" element={

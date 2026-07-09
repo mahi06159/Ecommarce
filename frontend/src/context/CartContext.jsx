@@ -16,6 +16,12 @@ export const CartProvider = ({ children }) => {
 
   // Load cart on init or user changes
   const fetchCart = async () => {
+    if (user && user.role === 'Seller') {
+      setCart(null);
+      localStorage.removeItem('cart_id');
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const cartId = getCachedCartId();
@@ -31,6 +37,7 @@ export const CartProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Failed to fetch cart:', err);
+      setCart(null);
     } finally {
       setLoading(false);
     }

@@ -39,7 +39,7 @@ export const Checkout = () => {
     setLoadingAddresses(true);
     try {
       const data = await api.get('/api/addresses/');
-      const addrList = Array.isArray(data) ? data : (data?.data && Array.isArray(data.data) ? data.data : []);
+      const addrList = data || [];
       setAddresses(addrList);
       
       // Auto select default address or first one

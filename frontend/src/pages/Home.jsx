@@ -55,9 +55,9 @@ export const Home = () => {
           api.get('/api/reviews/')
         ]);
         
-        setCategories(Array.isArray(catData) ? catData : []);
-        setProducts(Array.isArray(prodData) ? prodData : []);
-        setReviews(Array.isArray(revData) ? revData : []);
+        setCategories(catData || []);
+        setProducts(prodData || []);
+        setReviews(revData || []);
       } catch (err) {
         console.error('Failed to load homepage data:', err);
       } finally {

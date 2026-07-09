@@ -369,6 +369,55 @@ class OrderTests(APITestCase):
         self.product1.refresh_from_db()
         self.assertEqual(self.product1.stock, 8)
 
+    def test_seller_cannot_access_cart(self):
+        # Authenticate as a seller
+        self.client.force_authenticate(user=self.seller)
+        url = reverse('cart_view')
+        
+        # 1. Try to get cart
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        
+        # 2. Try to add item to cart
+        data = {
+            "product": self.product1.id,
+            "quantity": 1
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_cross_user_cart_access_denied(self):
+        # 1. Create a cart for self.buyer
+        self.client.force_authenticate(user=self.buyer)
+        url = reverse('cart_view')
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        buyer_cart_id = response.data['data']['id']
+        
+        # 2. Authenticate as self.other_buyer and try to retrieve self.buyer's cart
+        self.client.force_authenticate(user=self.other_buyer)
+        get_url = f"{url}?cart_id={buyer_cart_id}"
+        response = self.client.get(get_url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_cart_ownership_enforcement(self):
+        # 1. Create a cart and add item as self.buyer
+        self.client.force_authenticate(user=self.buyer)
+        url = reverse('cart_view')
+        response = self.client.post(url, {"product": self.product1.id, "quantity": 1}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        item_id = response.data['data']['items'][0]['id']
+        
+        # 2. Authenticate as self.other_buyer and try to modify self.buyer's cart item
+        self.client.force_authenticate(user=self.other_buyer)
+        patch_url = reverse('cart_item_update_delete', kwargs={'pk': item_id})
+        response = self.client.patch(patch_url, {"quantity": 2}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        
+        # 3. Try to delete self.buyer's cart item
+        response = self.client.delete(patch_url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     # 7. Soft Delete and Historical Product Name Tests
     def test_soft_delete_product_graceful(self):
         # 1. Place order for product1

@@ -40,8 +40,8 @@ export const Products = () => {
           api.get('/api/categories/'),
           api.get('/api/reviews/')
         ]);
-        setCategories(Array.isArray(catData) ? catData : []);
-        setReviews(Array.isArray(revData) ? revData : []);
+        setCategories(catData || []);
+        setReviews(revData || []);
       } catch (err) {
         console.error('Failed to load filters data:', err);
       }
@@ -88,7 +88,7 @@ export const Products = () => {
         }
 
         const data = await api.get(query);
-        setProducts(Array.isArray(data) ? data : []);
+        setProducts(data || []);
       } catch (err) {
         console.error('Failed to load products:', err);
       } finally {

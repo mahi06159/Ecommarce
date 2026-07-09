@@ -17,6 +17,8 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (res) => {
+    // Unwraps the unified success response payload so the caller receives
+    // the pure unwrapped data payload (such as an array or object) directly.
     if (res.data && typeof res.data.success !== 'undefined') {
       res.data = res.data.data;
     }

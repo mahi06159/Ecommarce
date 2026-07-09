@@ -172,10 +172,12 @@ export const Navbar = () => {
             </div>
 
             {/* Cart Button */}
-            <button className="action-btn cart-toggle-btn" onClick={() => setIsCartOpen(true)} aria-label="Open Cart">
-              <ShoppingBag size={20} />
-              {cartCount > 0 && <span className="cart-count-badge">{cartCount}</span>}
-            </button>
+            {(!user || user.role === 'Buyer') && (
+              <button className="action-btn cart-toggle-btn" onClick={() => setIsCartOpen(true)} aria-label="Open Cart">
+                <ShoppingBag size={20} />
+                {cartCount > 0 && <span className="cart-count-badge">{cartCount}</span>}
+              </button>
+            )}
 
           </div>
         </div>

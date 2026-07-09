@@ -251,6 +251,13 @@ class CartView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
+        if request.user.is_authenticated and request.user.role != 'Buyer':
+            return error_response(
+                message="Sellers cannot access the cart.",
+                errors={"detail": "You do not have permission to perform this action."},
+                status_code=status.HTTP_403_FORBIDDEN
+            )
+
         cart_id = request.query_params.get('cart_id')
         user = request.user
         cart = None
@@ -260,8 +267,29 @@ class CartView(APIView):
                 cart = Cart.objects.prefetch_related('items', 'items__product').get(pk=cart_id)
                 # Link cart to user if authenticated and not yet linked
                 if user.is_authenticated and cart.user is None:
-                    cart.user = user
-                    cart.save()
+                    # Check if user already has a cart to avoid duplicates
+                    user_cart = Cart.objects.filter(user=user).first()
+                    if user_cart:
+                        # Merge items from anonymous cart into existing user cart
+                        for item in cart.items.all():
+                            user_item, created = CartItem.objects.get_or_create(cart=user_cart, product=item.product)
+                            if not created:
+                                user_item.quantity = min(user_item.quantity + item.quantity, item.product.stock)
+                            else:
+                                user_item.quantity = min(item.quantity, item.product.stock)
+                            user_item.save()
+                        cart.delete()
+                        cart = user_cart
+                    else:
+                        cart.user = user
+                        cart.save()
+                elif cart.user is not None:
+                    # Check ownership
+                    if not user.is_authenticated or cart.user != user:
+                        return error_response(
+                            message="You do not have permission to access this cart.",
+                            status_code=status.HTTP_403_FORBIDDEN
+                        )
             except (Cart.DoesNotExist, ValueError, ValidationError):
                 pass
 
@@ -280,6 +308,13 @@ class CartView(APIView):
         )
 
     def post(self, request):
+        if request.user.is_authenticated and request.user.role != 'Buyer':
+            return error_response(
+                message="Sellers cannot access the cart.",
+                errors={"detail": "You do not have permission to perform this action."},
+                status_code=status.HTTP_403_FORBIDDEN
+            )
+
         cart_id = request.data.get('cart_id')
         product_id = request.data.get('product')
         quantity = request.data.get('quantity', 1)
@@ -299,6 +334,13 @@ class CartView(APIView):
         if cart_id:
             try:
                 cart = Cart.objects.get(pk=cart_id)
+                if cart.user is not None:
+                    # Check ownership
+                    if not user.is_authenticated or cart.user != user:
+                        return error_response(
+                            message="You do not have permission to access this cart.",
+                            status_code=status.HTTP_403_FORBIDDEN
+                        )
             except (Cart.DoesNotExist, ValueError, ValidationError):
                 pass
 
@@ -310,8 +352,21 @@ class CartView(APIView):
 
         # Double check user link
         if user.is_authenticated and cart.user is None:
-            cart.user = user
-            cart.save()
+            user_cart = Cart.objects.filter(user=user).first()
+            if user_cart:
+                # Merge items from anonymous cart into existing user cart
+                for item in cart.items.all():
+                    user_item, created = CartItem.objects.get_or_create(cart=user_cart, product=item.product)
+                    if not created:
+                        user_item.quantity = min(user_item.quantity + item.quantity, item.product.stock)
+                    else:
+                        user_item.quantity = min(item.quantity, item.product.stock)
+                    user_item.save()
+                cart.delete()
+                cart = user_cart
+            else:
+                cart.user = user
+                cart.save()
 
         # Fetch product
         try:
@@ -358,6 +413,13 @@ class CartItemUpdateDeleteView(APIView):
     permission_classes = [AllowAny]
 
     def patch(self, request, pk):
+        if request.user.is_authenticated and request.user.role != 'Buyer':
+            return error_response(
+                message="Sellers cannot access the cart.",
+                errors={"detail": "You do not have permission to perform this action."},
+                status_code=status.HTTP_403_FORBIDDEN
+            )
+
         try:
             cart_item = CartItem.objects.select_related('product', 'cart').get(pk=pk)
         except CartItem.DoesNotExist:
@@ -365,6 +427,15 @@ class CartItemUpdateDeleteView(APIView):
                 message="Cart item not found.",
                 status_code=status.HTTP_404_NOT_FOUND
             )
+
+        # Ownership check
+        cart = cart_item.cart
+        if cart.user is not None:
+            if not request.user.is_authenticated or cart.user != request.user:
+                return error_response(
+                    message="You do not have permission to access this cart.",
+                    status_code=status.HTTP_403_FORBIDDEN
+                )
 
         quantity = request.data.get('quantity')
         if quantity is None:
@@ -401,6 +472,13 @@ class CartItemUpdateDeleteView(APIView):
         )
 
     def delete(self, request, pk):
+        if request.user.is_authenticated and request.user.role != 'Buyer':
+            return error_response(
+                message="Sellers cannot access the cart.",
+                errors={"detail": "You do not have permission to perform this action."},
+                status_code=status.HTTP_403_FORBIDDEN
+            )
+
         try:
             cart_item = CartItem.objects.select_related('cart').get(pk=pk)
         except CartItem.DoesNotExist:
@@ -409,7 +487,15 @@ class CartItemUpdateDeleteView(APIView):
                 status_code=status.HTTP_404_NOT_FOUND
             )
 
+        # Ownership check
         cart = cart_item.cart
+        if cart.user is not None:
+            if not request.user.is_authenticated or cart.user != request.user:
+                return error_response(
+                    message="You do not have permission to access this cart.",
+                    status_code=status.HTTP_403_FORBIDDEN
+                )
+
         cart_item.delete()
 
         cart_serializer = CartSerializer(cart)
