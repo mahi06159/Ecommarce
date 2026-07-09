@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, ShieldCheck, CreditCard, ChevronRight, Plus, Check } from 'lucide-react';
+import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import api from '../api/client';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { Navbar } from '../components/layout/Navbar';
+import { getImgSrc, getPrimaryImg } from '../utils/imageUtils';
 import './Checkout.css';
 
 export const Checkout = () => {
@@ -149,7 +151,7 @@ export const Checkout = () => {
         amount: paymentData.amount,
         currency: paymentData.currency,
         name: 'Mahi Store',
-        description: 'Secure Payment for Order 💕',
+        description: 'Secure Payment for Order',
         order_id: paymentData.razorpay_order_id,
         handler: async (response) => {
           setPlacingOrder(true);
@@ -225,11 +227,7 @@ export const Checkout = () => {
     return `${addr.address_line1}, ${addr.address_line2 ? addr.address_line2 + ', ' : ''}${addr.city}, ${addr.state} - ${addr.postal_code}, ${addr.country}`;
   };
 
-  const getImgSrc = (img) => {
-    if (!img) return 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=150';
-    if (img.startsWith('http')) return img;
-    return `http://localhost:8000${img.startsWith('/') ? '' : '/'}${img}`;
-  };
+
 
   return (
     <div className="checkout-page-wrapper">
@@ -463,7 +461,7 @@ export const Checkout = () => {
                     const product = item.product_details || {};
                     return (
                       <div key={item.id} className="review-item-card">
-                        <img src={getImgSrc(product.img)} alt={product.name} className="review-item-img" />
+                        <img src={getImgSrc(getPrimaryImg(product))} alt={product.name} className="review-item-img" />
                         <div className="review-item-details">
                           <h5>{product.name}</h5>
                           <span className="qty font-mono">Qty: {item.quantity}</span>
@@ -481,13 +479,15 @@ export const Checkout = () => {
                 <button className="btn-back-step btn-square" onClick={() => setStep(1)}>
                   ← BACK
                 </button>
-                <button 
+                <motion.button 
                   className="btn-place-order btn-square" 
                   onClick={handlePlaceOrder}
                   disabled={placingOrder}
+                  whileHover={placingOrder ? {} : { scale: 1.04 }}
+                  whileTap={placingOrder ? {} : { scale: 0.97 }}
                 >
                   {placingOrder ? 'PROCESSING PAYMENT...' : 'PAY & PLACE ORDER 💕'}
-                </button>
+                </motion.button>
               </div>
             </div>
 

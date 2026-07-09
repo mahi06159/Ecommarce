@@ -5,6 +5,7 @@ import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Navbar } from '../components/layout/Navbar';
+import { getImgSrc } from '../utils/imageUtils';
 import './Profile.css';
 
 export const Profile = () => {
@@ -163,11 +164,7 @@ export const Profile = () => {
     return '₹' + Number(price).toLocaleString('en-IN');
   };
 
-  const getImgSrc = (img) => {
-    if (!img) return null;
-    if (img.startsWith('http')) return img;
-    return `http://localhost:8000${img.startsWith('/') ? '' : '/'}${img}`;
-  };
+
 
   return (
     <div className="profile-page-wrapper">

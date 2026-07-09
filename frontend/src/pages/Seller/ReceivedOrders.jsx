@@ -5,6 +5,7 @@ import api from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Navbar } from '../../components/layout/Navbar';
+import { getImgSrc, getPrimaryImg } from '../../utils/imageUtils';
 import './ReceivedOrders.css';
 
 export const ReceivedOrders = () => {
@@ -58,11 +59,7 @@ export const ReceivedOrders = () => {
     return '₹' + Number(price).toLocaleString('en-IN');
   };
 
-  const getImgSrc = (img) => {
-    if (!img) return 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=150';
-    if (img.startsWith('http')) return img;
-    return `http://localhost:8000${img.startsWith('/') ? '' : '/'}${img}`;
-  };
+
 
   // Extract all individual items from seller orders for list presentation
   const allOrderItems = [];
@@ -131,7 +128,7 @@ export const ReceivedOrders = () => {
                   
                   {/* Product detail row */}
                   <div className="order-product-section">
-                    <img src={getImgSrc(product.img)} alt={product.name} className="product-thumb" />
+                    <img src={getImgSrc(getPrimaryImg(product))} alt={product.name} className="product-thumb" />
                     <div className="product-details">
                       <span className="order-id font-mono">Order ID: #{item.orderId}</span>
                       <h4 className="product-name">{product.name}</h4>

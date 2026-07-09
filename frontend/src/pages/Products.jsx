@@ -1,11 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Filter, Star, Search, SlidersHorizontal } from 'lucide-react';
+import { motion } from 'framer-motion';
 import api from '../api/client';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { Navbar } from '../components/layout/Navbar';
+import { getImgSrc } from '../utils/imageUtils';
 import './Products.css';
+
+// Reusable 3D tilt card
+const TiltCard = ({ children, className }) => {
+  const ref = useRef(null);
+  const onMouseMove = (e) => {
+    const el = ref.current;
+    if (!el) return;
+    const { left, top, width, height } = el.getBoundingClientRect();
+    const x = (e.clientX - left) / width  - 0.5;
+    const y = (e.clientY - top)  / height - 0.5;
+    el.style.transform = `perspective(800px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) scale(1.02)`;
+  };
+  const onMouseLeave = () => {
+    if (ref.current) ref.current.style.transform = 'perspective(800px) rotateY(0) rotateX(0) scale(1)';
+  };
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      style={{ transition: 'transform 0.18s ease', willChange: 'transform' }}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ duration: 0.42, ease: 'easeOut' }}
+    >
+      {children}
+    </motion.div>
+  );
+};
 
 export const Products = () => {
   const location = useLocation();
@@ -167,11 +200,7 @@ export const Products = () => {
     return '₹' + Number(price).toLocaleString('en-IN');
   };
 
-  const getImgSrc = (img) => {
-    if (!img) return 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=300';
-    if (img.startsWith('http')) return img;
-    return `http://localhost:8000${img.startsWith('/') ? '' : '/'}${img}`;
-  };
+
 
   return (
     <div className="products-page-wrapper">
@@ -313,11 +342,11 @@ export const Products = () => {
                 const stars = Math.round(product.average_rating || 0);
 
                 return (
-                  <div key={product.id} className="product-listing-card">
+                  <TiltCard key={product.id} className="product-listing-card">
                     <div className="product-img-box" onClick={() => navigate(`/products/${product.id}`)}>
                       {isSale && <span className="badge-sale">SALE</span>}
                       <img 
-                        src={getImgSrc(product.img)} 
+                        src={getImgSrc(product.primary_image)} 
                         alt={product.name} 
                         className="product-card-img"
                       />
@@ -362,19 +391,21 @@ export const Products = () => {
                       </div>
                       
                       {stockVal > 0 ? (
-                        <button 
+                        <motion.button 
                           className="btn-add-cart-simple btn-square" 
                           onClick={() => handleAddToCart(product)}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
                         >
                           Add to Cart ✨
-                        </button>
+                        </motion.button>
                       ) : (
                         <button className="btn-add-cart-simple btn-square out-of-stock" disabled>
                           Out of Stock
                         </button>
                       )}
                     </div>
-                  </div>
+                  </TiltCard>
                 );
               })}
             </div>

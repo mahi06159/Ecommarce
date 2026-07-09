@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Trash2, Plus, Minus, ArrowRight, ShoppingBag } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { getImgSrc, getPrimaryImg } from '../../utils/imageUtils';
 import './CartDrawer.css';
 
 export const CartDrawer = () => {
@@ -57,12 +58,7 @@ export const CartDrawer = () => {
     return '₹' + Number(price).toLocaleString('en-IN');
   };
 
-  // Helper to resolve image source
-  const getImgSrc = (img) => {
-    if (!img) return 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=150'; // standard placeholder
-    if (img.startsWith('http')) return img;
-    return `http://localhost:8000${img.startsWith('/') ? '' : '/'}${img}`;
-  };
+
 
   return (
     <div className="cart-drawer-overlay" onClick={() => setIsCartOpen(false)}>
@@ -97,7 +93,7 @@ export const CartDrawer = () => {
                 return (
                   <div key={item.id} className="cart-item-card">
                     <img 
-                      src={getImgSrc(product.img)} 
+                      src={getImgSrc(getPrimaryImg(product))} 
                       alt={product.name} 
                       className="cart-item-img"
                     />

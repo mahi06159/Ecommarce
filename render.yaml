@@ -1,0 +1,41 @@
+services:
+  # ─────────────────────────────────────────────
+  # Django Web Service
+  # ─────────────────────────────────────────────
+  - type: web
+    name: mahi-store-backend
+    env: python
+    region: singapore          # closest to India; change to ohio/oregon as needed
+    plan: free
+    buildCommand: |
+      pip install -r requirements.txt &&
+      python manage.py collectstatic --noinput &&
+      python manage.py migrate --noinput
+    startCommand: gunicorn ecom_project.wsgi --log-file -
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true          # Render auto-generates a secure value
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"       # update with your exact Render domain after deploy
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://your-app.vercel.app"  # replace after Vercel deploy
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mahi-store-db
+          property: connectionString
+      - key: RAZORPAY_KEY_ID
+        sync: false                  # set manually in Render dashboard
+      - key: RAZORPAY_KEY_SECRET
+        sync: false                  # set manually in Render dashboard
+
+# ─────────────────────────────────────────────
+# Managed PostgreSQL Database
+# ─────────────────────────────────────────────
+databases:
+  - name: mahi-store-db
+    databaseName: mahi_store
+    user: mahi_store_user
+    plan: free
+    region: singapore

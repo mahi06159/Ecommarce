@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { Navbar } from '../components/layout/Navbar';
+import { getImgSrc, getPrimaryImg } from '../utils/imageUtils';
 import './ProductDetail.css';
 
 export const ProductDetail = () => {
@@ -126,11 +127,7 @@ export const ProductDetail = () => {
     return '₹' + Number(price).toLocaleString('en-IN');
   };
 
-  const getImgSrc = (img) => {
-    if (!img) return 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=600';
-    if (img.startsWith('http')) return img;
-    return `http://localhost:8000${img.startsWith('/') ? '' : '/'}${img}`;
-  };
+
 
   if (loading) {
     return (
@@ -157,7 +154,7 @@ export const ProductDetail = () => {
         {/* Left Side: Product Image */}
         <div className="detail-image-panel">
           <img 
-            src={getImgSrc(product.img)} 
+            src={getImgSrc(getPrimaryImg(product))} 
             alt={product.name} 
             className="detail-main-img"
           />

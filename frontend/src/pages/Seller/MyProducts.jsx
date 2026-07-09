@@ -5,6 +5,7 @@ import api from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Navbar } from '../../components/layout/Navbar';
+import { getImgSrc, getPrimaryImg } from '../../utils/imageUtils';
 import './MyProducts.css';
 
 export const MyProducts = () => {
@@ -77,7 +78,7 @@ export const MyProducts = () => {
     setPrice(prod.price);
     setStock(prod.stock);
     setImageFile(null);
-    setImagePreview(prod.img ? `http://localhost:8000${prod.img.startsWith('/') ? '' : '/'}${prod.img}` : null);
+    setImagePreview(getImgSrc(getPrimaryImg(prod)));
     setShowModal(true);
   };
 
@@ -150,11 +151,7 @@ export const MyProducts = () => {
     return '₹' + Number(price).toLocaleString('en-IN');
   };
 
-  const getImgSrc = (img) => {
-    if (!img) return 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=150';
-    if (img.startsWith('http')) return img;
-    return `http://localhost:8000${img.startsWith('/') ? '' : '/'}${img}`;
-  };
+
 
   return (
     <div className="my-products-page-wrapper">
@@ -206,7 +203,7 @@ export const MyProducts = () => {
                     <tr key={prod.id}>
                       <td>
                         <div className="table-product-cell">
-                          <img src={getImgSrc(prod.img)} alt={prod.name} className="table-product-img" />
+                          <img src={getImgSrc(getPrimaryImg(prod))} alt={prod.name} className="table-product-img" />
                           <div className="table-product-details">
                             <span className="name">{prod.name}</span>
                             <span className="id font-mono">ID: #{prod.id}</span>
