@@ -407,8 +407,8 @@ This project is licensed under the **MIT License**. See `LICENSE` for details.
 
 - **Name:** Mahi Panara
 - **GitHub:** [github.com/mahi06159](https://github.com/mahi06159)
-- **LinkedIn:** [linkedin.com/in/mahipanara](https://www.linkedin.com/in/mahipanara/) *(replace/verify with your URL)*
-- **Email:** `mahipanara06159@gmail.com` *(replace/verify with your URL)*
+- **LinkedIn:** [linkedin.com/in/mahipanara](https://www.linkedin.com/in/panara-mahi-507b932ab/) 
+- **Email:** `panaramahi999@gmail.com` 
 
 ---
 
